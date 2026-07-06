@@ -20,16 +20,16 @@ persistence:
 
 resources:
   requests:
-    cpu: "1"
-    memory: "4Gi"
+    cpu: "500m"
+    memory: "2Gi"
   limits:
     cpu: "2"
-    memory: "6Gi"
+    memory: "4Gi"
 
 javaOpts: >-
-  -Xms2g
-  -Xmx2g
-  -XX:MaxDirectMemorySize=2g
+  -Xms1g
+  -Xmx1g
+  -XX:MaxDirectMemorySize=1g
   -Djava.util.prefs.userRoot=/nexus-data/javaprefs
 
 httpRoute:
