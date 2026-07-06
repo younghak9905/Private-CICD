@@ -1,0 +1,63 @@
+{{- $root := . -}}
+{{- range $color, $config := .Values.colors }}
+{{- if $config.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "springboot-demo.fullname" $root }}-{{ $color }}
+  labels:
+    {{- include "springboot-demo.labels" $root | nindent 4 }}
+    app.kubernetes.io/color: {{ $color }}
+spec:
+  replicas: {{ $root.Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "springboot-demo.selectorLabels" $root | nindent 6 }}
+      app.kubernetes.io/color: {{ $color }}
+  template:
+    metadata:
+      annotations:
+        {{- toYaml $root.Values.podAnnotations | nindent 8 }}
+      labels:
+        {{- include "springboot-demo.selectorLabels" $root | nindent 8 }}
+        app.kubernetes.io/color: {{ $color }}
+    spec:
+      imagePullSecrets:
+        {{- toYaml $root.Values.imagePullSecrets | nindent 8 }}
+      containers:
+        - name: springboot-demo
+          image: "{{ $root.Values.image.repository }}:{{ default $root.Values.image.tag $config.image.tag }}"
+          imagePullPolicy: {{ $root.Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $root.Values.service.targetPort }}
+              protocol: TCP
+          env:
+            - name: APP_COLOR
+              value: {{ $color | quote }}
+            - name: APP_VERSION
+              value: {{ default $root.Values.image.tag $config.image.tag | quote }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            {{- toYaml $root.Values.resources | nindent 12 }}
+      nodeSelector:
+        {{- toYaml $root.Values.nodeSelector | nindent 8 }}
+      affinity:
+        {{- toYaml $root.Values.affinity | nindent 8 }}
+      tolerations:
+        {{- toYaml $root.Values.tolerations | nindent 8 }}
+---
+{{- end }}
+{{- end }}
+

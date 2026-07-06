@@ -1,0 +1,48 @@
+replicaCount: 1
+
+image:
+  repository: harbor.example.com/external/sonatype/nexus3
+  tag: "3.93.2"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: harbor-regcred
+
+service:
+  type: ClusterIP
+  port: 8081
+
+persistence:
+  enabled: true
+  storageClass: csi-cinder-sc-retain
+  accessMode: ReadWriteOnce
+  size: 100Gi
+
+resources:
+  requests:
+    cpu: "1"
+    memory: "4Gi"
+  limits:
+    cpu: "2"
+    memory: "6Gi"
+
+javaOpts: >-
+  -Xms2g
+  -Xmx2g
+  -XX:MaxDirectMemorySize=2g
+  -Djava.util.prefs.userRoot=/nexus-data/javaprefs
+
+httpRoute:
+  enabled: false
+  name: nexus-route
+  hostnames:
+    - nexus.example.com
+  parentRefs:
+    - name: service-gateway
+      namespace: istio-ingress
+      sectionName: http
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

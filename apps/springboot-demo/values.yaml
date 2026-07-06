@@ -1,0 +1,49 @@
+replicaCount: 1
+
+activeColor: blue
+
+image:
+  repository: harbor.example.com/external/springboot-demo
+  tag: "0.1.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: harbor-regcred
+
+colors:
+  blue:
+    enabled: true
+    image:
+      tag: ""
+  green:
+    enabled: false
+    image:
+      tag: ""
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+
+httpRoute:
+  enabled: true
+  name: springboot-demo-route
+  hostnames:
+    - springboot-demo.example.com
+  parentRefs:
+    - name: service-gateway
+      namespace: istio-ingress
+      sectionName: http
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

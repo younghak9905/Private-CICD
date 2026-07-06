@@ -1,0 +1,7 @@
+apiVersion: v2
+name: springboot-demo
+description: Blue/green Spring Boot demo deployment
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+

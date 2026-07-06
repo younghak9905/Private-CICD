@@ -1,0 +1,7 @@
+apiVersion: v2
+name: nexus
+description: Nexus Repository Manager for private Maven dependencies
+type: application
+version: 0.1.0
+appVersion: "3.93.2"
+
