@@ -39,7 +39,7 @@ spec:
             failureThreshold: 60
           readinessProbe:
             httpGet:
-              path: /service/rest/v1/status/ready
+              path: /
               port: http
             periodSeconds: 10
             timeoutSeconds: 5
