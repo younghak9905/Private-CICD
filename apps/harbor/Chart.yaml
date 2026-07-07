@@ -1,0 +1,11 @@
+apiVersion: v2
+name: harbor
+description: Harbor registry managed by Argo CD
+type: application
+version: 0.1.0
+appVersion: "2.15.1"
+dependencies:
+  - name: harbor
+    version: 1.19.1
+    repository: file://charts/harbor
+

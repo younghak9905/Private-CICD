@@ -1,0 +1,71 @@
+httpRoute:
+  enabled: true
+  name: sonarqube-route
+  hostnames:
+    - sonarqube.example.com
+  parentRefs:
+    - name: service-gateway
+      namespace: istio-ingress
+      sectionName: http
+  backendRefs:
+    - name: sonarqube-sonarqube
+      port: 9000
+
+sonarqube:
+  deploymentType: StatefulSet
+  replicaCount: 1
+
+  community:
+    enabled: true
+    buildNumber: "26.5.0.122743"
+
+  image:
+    repository: harbor.example.com/external/sonarqube
+    tag: "26.5.0.122743-community"
+    pullPolicy: IfNotPresent
+    pullSecrets:
+      - name: harbor-regcred
+
+  service:
+    type: ClusterIP
+    externalPort: 9000
+    internalPort: 9000
+
+  ingress:
+    enabled: false
+
+  httproute:
+    enabled: false
+
+  mcp:
+    enabled: false
+
+  monitoringPasscodeSecretName: sonarqube-monitoring-passcode
+  monitoringPasscodeSecretKey: passcode
+
+  jdbcOverwrite:
+    enabled: true
+    jdbcUrl: jdbc:postgresql://sonarqube-postgresql.sonarqube.svc.cluster.local:5432/sonarqube
+    jdbcUsername: sonarqube
+    jdbcSecretName: sonarqube-db-secret
+    jdbcSecretPasswordKey: password
+
+  persistence:
+    enabled: true
+    storageClass: csi-cinder-sc-retain
+    accessMode: ReadWriteOnce
+    size: 10Gi
+
+  resources:
+    requests:
+      cpu: "400m"
+      memory: "2048M"
+    limits:
+      cpu: "800m"
+      memory: "6144M"
+
+  initSysctl:
+    enabled: true
+
+  initFs:
+    enabled: true

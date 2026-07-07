@@ -1,0 +1,11 @@
+apiVersion: v2
+name: sonarqube-postgresql
+description: PostgreSQL for SonarQube managed by Argo CD
+type: application
+version: 0.1.0
+appVersion: "18.4.0"
+dependencies:
+  - name: postgresql
+    version: 18.7.11
+    repository: file://charts/postgresql
+

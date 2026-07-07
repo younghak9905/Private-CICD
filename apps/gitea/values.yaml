@@ -1,0 +1,71 @@
+httpRoute:
+  enabled: true
+  name: gitea-route
+  hostnames:
+    - gitea.example.com
+  parentRefs:
+    - name: service-gateway
+      namespace: istio-ingress
+      sectionName: http
+  backendRefs:
+    - name: gitea-http
+      port: 3000
+
+gitea:
+  global:
+    imagePullSecrets:
+      - harbor-regcred
+    security:
+      allowInsecureImages: true
+
+  image:
+    registry: harbor.example.com
+    repository: external/gitea
+    tag: 1.26.4
+    rootless: true
+    pullPolicy: IfNotPresent
+
+  persistence:
+    enabled: true
+    storageClass: csi-cinder-sc-retain
+    size: 20Gi
+
+  service:
+    http:
+      type: ClusterIP
+      port: 3000
+    ssh:
+      type: ClusterIP
+
+  postgresql:
+    enabled: true
+    image:
+      registry: harbor.example.com
+      repository: external/postgresql
+      tag: 17.6.0-debian-12-r4
+    volumePermissions:
+      image:
+        registry: harbor.example.com
+        repository: external/os-shell
+        tag: 12-debian-12-r51
+    metrics:
+      enabled: false
+    primary:
+      persistence:
+        enabled: true
+        storageClass: csi-cinder-sc-retain
+        size: 20Gi
+
+  postgresql-ha:
+    enabled: false
+
+  valkey-cluster:
+    enabled: false
+
+  gitea:
+    config:
+      server:
+        DOMAIN: gitea.example.com
+        ROOT_URL: http://gitea.example.com/
+      database:
+        DB_TYPE: postgres

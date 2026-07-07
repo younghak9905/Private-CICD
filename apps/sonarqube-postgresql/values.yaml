@@ -1,0 +1,43 @@
+postgresql:
+  global:
+    imagePullSecrets:
+      - harbor-regcred
+    security:
+      allowInsecureImages: true
+
+  architecture: standalone
+
+  image:
+    registry: harbor.example.com
+    repository: external/postgresql
+    tag: 17.6.0-debian-12-r4
+    pullPolicy: IfNotPresent
+
+  auth:
+    enablePostgresUser: true
+    username: sonarqube
+    database: sonarqube
+    existingSecret: sonarqube-db-secret
+    secretKeys:
+      adminPasswordKey: postgres-password
+      userPasswordKey: password
+
+  primary:
+    persistence:
+      enabled: true
+      storageClass: csi-cinder-sc-retain
+      size: 20Gi
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "512Mi"
+      limits:
+        cpu: "1"
+        memory: "2Gi"
+
+  metrics:
+    enabled: false
+
+  volumePermissions:
+    enabled: false
+

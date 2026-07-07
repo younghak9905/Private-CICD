@@ -1,0 +1,43 @@
+httpRoute:
+  enabled: true
+  name: argocd-route
+  hostnames:
+    - argocd.example.com
+  parentRefs:
+    - name: service-gateway
+      namespace: istio-ingress
+      sectionName: http
+  backendRefs:
+    - name: argocd-server
+      port: 80
+
+argo-cd:
+  global:
+    image:
+      repository: harbor.example.com/external/argoproj/argocd
+      tag: "v3.4.4"
+      imagePullPolicy: IfNotPresent
+    imagePullSecrets:
+      - name: harbor-regcred
+
+  dex:
+    enabled: false
+
+  notifications:
+    enabled: false
+
+  redis-ha:
+    enabled: false
+
+  redis:
+    image:
+      repository: harbor.example.com/external/redis
+      tag: "CHANGE_ME_REDIS_TAG"
+
+  server:
+    service:
+      type: ClusterIP
+
+  configs:
+    params:
+      server.insecure: true

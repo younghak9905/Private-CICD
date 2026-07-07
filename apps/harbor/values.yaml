@@ -1,0 +1,107 @@
+httpRoute:
+  enabled: true
+  name: harbor-route
+  hostnames:
+    - harbor.example.com
+  parentRefs:
+    - name: service-gateway
+      namespace: istio-ingress
+      sectionName: http
+    - name: service-gateway
+      namespace: istio-ingress
+      sectionName: https-harbor
+
+harbor:
+  expose:
+    type: clusterIP
+    tls:
+      enabled: false
+    clusterIP:
+      name: harbor
+      ports:
+        httpPort: 80
+
+  externalURL: https://harbor.example.com
+
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets:
+    - name: kcr-regcred
+
+  persistence:
+    enabled: true
+    resourcePolicy: keep
+    persistentVolumeClaim:
+      registry:
+        storageClass: csi-cinder-sc-retain
+        accessMode: ReadWriteOnce
+        size: 50Gi
+      jobservice:
+        jobLog:
+          storageClass: csi-cinder-sc-retain
+          accessMode: ReadWriteOnce
+          size: 10Gi
+      database:
+        storageClass: csi-cinder-sc-retain
+        accessMode: ReadWriteOnce
+        size: 20Gi
+      redis:
+        storageClass: csi-cinder-sc-retain
+        accessMode: ReadWriteOnce
+        size: 10Gi
+
+  updateStrategy:
+    type: Recreate
+
+  nginx:
+    image:
+      repository: registry.cloud.kt.com/2e2koiqr/goharbor/nginx-photon
+      tag: v2.15.1
+
+  portal:
+    image:
+      repository: registry.cloud.kt.com/2e2koiqr/goharbor/harbor-portal
+      tag: v2.15.1
+
+  core:
+    image:
+      repository: registry.cloud.kt.com/2e2koiqr/goharbor/harbor-core
+      tag: v2.15.1
+
+  jobservice:
+    image:
+      repository: registry.cloud.kt.com/2e2koiqr/goharbor/harbor-jobservice
+      tag: v2.15.1
+
+  registry:
+    relativeurls: true
+    registry:
+      image:
+        repository: registry.cloud.kt.com/2e2koiqr/goharbor/registry-photon
+        tag: v2.15.1
+    controller:
+      image:
+        repository: registry.cloud.kt.com/2e2koiqr/goharbor/harbor-registryctl
+        tag: v2.15.1
+
+  database:
+    type: internal
+    internal:
+      image:
+        repository: registry.cloud.kt.com/2e2koiqr/goharbor/harbor-db
+        tag: v2.15.1
+      password: CHANGE_ME_USE_EXISTING_SECRET
+
+  redis:
+    type: internal
+    internal:
+      image:
+        repository: registry.cloud.kt.com/2e2koiqr/goharbor/redis-photon
+        tag: v2.15.1
+
+  exporter:
+    image:
+      repository: registry.cloud.kt.com/2e2koiqr/goharbor/harbor-exporter
+      tag: v2.15.1
+
+  trivy:
+    enabled: false

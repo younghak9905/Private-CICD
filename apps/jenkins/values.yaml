@@ -1,0 +1,94 @@
+httpRoute:
+  enabled: true
+  name: jenkins-route
+  hostnames:
+    - jenkins.example.com
+  parentRefs:
+    - name: service-gateway
+      namespace: istio-ingress
+      sectionName: http
+  backendRefs:
+    - name: jenkins
+      port: 8080
+
+jenkins:
+  controller:
+    image:
+      registry: harbor.example.com
+      repository: external/jenkins/jenkins
+      tag: "2.555.3-jdk21"
+    imagePullSecretName: harbor-regcred
+
+    jenkinsUrl: http://jenkins.example.com
+
+    numExecutors: 0
+
+    admin:
+      createSecret: true
+      username: admin
+
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "2Gi"
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+
+    javaOpts: >-
+      -Xms1024m
+      -Xmx2048m
+      -Djenkins.install.runSetupWizard=false
+
+    installPlugins: []
+    additionalPlugins: []
+    installLatestPlugins: false
+    initializeOnce: false
+    overwritePlugins: false
+    overwritePluginsFromImage: false
+
+    JCasC:
+      defaultConfig: true
+      configScripts:
+        cicd-message: |
+          jenkins:
+            systemMessage: "saejong CI/CD: Gitea -> Jenkins -> SonarQube -> Harbor -> Argo CD -> Kubernetes"
+
+    sidecars:
+      configAutoReload:
+        enabled: true
+        image:
+          registry: harbor.example.com
+          repository: external/kiwigrid/k8s-sidecar
+          tag: 2.7.4
+
+  persistence:
+    enabled: true
+    storageClass: csi-cinder-sc-retain
+    size: 20Gi
+
+  agent:
+    image:
+      registry: harbor.example.com
+      repository: external/jenkins/inbound-agent
+      tag: "3355.v388858a_47b_33-23"
+    imagePullSecretName: harbor-regcred
+    websocket: true
+    resources:
+      requests:
+        cpu: "512m"
+        memory: "512Mi"
+      limits:
+        cpu: "1"
+        memory: "1Gi"
+
+  rbac:
+    create: true
+
+  serviceAccount:
+    create: true
+    imagePullSecretName: harbor-regcred
+
+  serviceAccountAgent:
+    create: true
+    imagePullSecretName: harbor-regcred

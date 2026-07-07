@@ -1,0 +1,11 @@
+apiVersion: v2
+name: sonarqube
+description: SonarQube managed by Argo CD
+type: application
+version: 0.1.0
+appVersion: "2026.3.0"
+dependencies:
+  - name: sonarqube
+    version: 2026.3.0
+    repository: file://charts/sonarqube
+

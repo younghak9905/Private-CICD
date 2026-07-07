@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: spring
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: http://gitea-http.gitea.svc.cluster.local:3000/gitea-admin/platform-gitops.git
+    targetRevision: main
+    path: apps/springboot-demo
+    helm:
+      releaseName: spring
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: springboot-demo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

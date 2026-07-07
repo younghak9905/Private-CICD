@@ -1,83 +1,94 @@
 # platform-gitops
 
-GitOps repository for Argo CD managed deployments.
-
-## Ubuntu prerequisites
-
-```bash
-sudo apt-get update
-sudo apt-get install -y git curl
-```
-
-Install Helm on the Ubuntu management node if it is not installed:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 -o /tmp/get-helm-3.sh
-chmod 700 /tmp/get-helm-3.sh
-sudo /tmp/get-helm-3.sh
-```
+GitOps repository for the saejong CI/CD platform.
 
 ## Layout
 
 ```text
-argocd/applications/
+bootstrap/
+  root-app.yaml
+
+applications/
+  argocd.yaml
+  gitea.yaml
+  harbor.yaml
+  jenkins.yaml
+  nexus.yaml
+  sonarqube-postgresql.yaml
+  sonarqube.yaml
   springboot-demo.yaml
 
 apps/
+  argocd/
+  gitea/
+  harbor/
+  jenkins/
+  nexus/
+  sonarqube-postgresql/
+  sonarqube/
   springboot-demo/
-    Chart.yaml
-    values.yaml
-    templates/
 ```
 
-## Blue/green switch
+## Bootstrap
 
-`apps/springboot-demo/values.yaml` controls the active color.
-
-```yaml
-activeColor: blue
-```
-
-To stage a new version:
-
-1. Set `colors.green.enabled=true`.
-2. Set `colors.green.image.tag` to the new image tag.
-3. Validate `springboot-demo-green`.
-4. Switch `activeColor` to `green`.
-
-Jenkins can update the default `image.tag` for simple validation, but production blue/green promotion should be a reviewed GitOps change.
-
-## Render on Ubuntu
+Apply the root app once:
 
 ```bash
-cd ~/sn/platform-gitops
-helm template springboot-demo ./apps/springboot-demo -n springboot-demo
+kubectl apply -f bootstrap/root-app.yaml
 ```
 
-Server dry-run:
+`root-app` watches `applications/` and creates the individual Argo CD Applications.
+
+## Vendored Charts
+
+Infrastructure apps use vendored Helm charts under each `apps/<name>/charts/` directory.
+
+Each app README includes the exact `helm pull --untar` command required to refresh the vendored chart.
+
+Before first sync, populate the chart directories, for example:
 
 ```bash
-helm template springboot-demo ./apps/springboot-demo -n springboot-demo \
-  | kubectl -n springboot-demo apply --dry-run=server -f -
+helm pull harbor/harbor \
+  --version 1.19.1 \
+  --untar \
+  --untardir apps/harbor/charts
 ```
 
-## Push to Gitea from Ubuntu
+## Sync Policy
 
-Create an empty `platform-gitops` repo in Gitea first, then run:
+Existing stateful infrastructure starts with manual sync in its Application manifest.
+
+Enable automated sync and prune only after:
 
 ```bash
-cd ~/sn/platform-gitops
-git init
-git add .
-git commit -m "feat(gitops): add springboot demo chart"
-git branch -M main
-git remote add origin https://gitea.example.com/gitea-admin/platform-gitops.git
-git push -u origin main
+helm template <release> apps/<name> -n <namespace> > /tmp/<name>.yaml
+kubectl -n <namespace> diff -f /tmp/<name>.yaml
 ```
 
-If the remote already exists:
+## Secrets
 
-```bash
-git remote set-url origin https://gitea.example.com/gitea-admin/platform-gitops.git
-git push -u origin main
+Do not store plain secrets in this repository.
+
+Use one of:
+
+```text
+- manually pre-created Kubernetes Secrets
+- Sealed Secrets
+- SOPS
+- External Secrets Operator
 ```
+
+Current manifests assume required Secrets already exist in their namespaces.
+
+## App Flow
+
+```text
+springboot-demo source repo
+-> Jenkins
+-> SonarQube
+-> Harbor
+-> platform-gitops values update
+-> Argo CD
+-> Kubernetes
+```
+

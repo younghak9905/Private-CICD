@@ -20,11 +20,11 @@ persistence:
 
 resources:
   requests:
-    cpu: "500m"
-    memory: "2Gi"
+    cpu: "1"
+    memory: "4Gi"
   limits:
     cpu: "2"
-    memory: "4Gi"
+    memory: "6Gi"
 
 javaOpts: >-
   -Xms1g
