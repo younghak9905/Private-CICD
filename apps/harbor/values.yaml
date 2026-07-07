@@ -89,7 +89,7 @@ harbor:
       image:
         repository: registry.cloud.kt.com/2e2koiqr/goharbor/harbor-db
         tag: v2.15.1
-      password: CHANGE_ME_USE_EXISTING_SECRET
+      password: "jininfra04"
 
   redis:
     type: internal

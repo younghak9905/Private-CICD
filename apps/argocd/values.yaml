@@ -32,7 +32,7 @@ argo-cd:
   redis:
     image:
       repository: harbor.example.com/external/redis
-      tag: "CHANGE_ME_REDIS_TAG"
+      tag: "8.2.3-alpine"
 
   server:
     service:

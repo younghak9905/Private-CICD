@@ -69,6 +69,5 @@ kubectl -n harbor diff -f /tmp/harbor-rendered.yaml
 - Keep `persistence.resourcePolicy=keep`.
 - Keep `updateStrategy.type=Recreate` for RWO volumes.
 - KT volumes should use 10Gi multiples.
-- Replace `CHANGE_ME_USE_EXISTING_SECRET` with a proper Secret-based chart setting before first sync.
+- Confirm sensitive values in `values.yaml` match the live Harbor installation before sync.
 - Start with manual sync; enable automated prune only after diff is stable.
-

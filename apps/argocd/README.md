@@ -25,7 +25,7 @@ helm pull argo/argo-cd \
 
 ## Required Follow-up
 
-Replace `CHANGE_ME_REDIS_TAG` in `values.yaml` with the mirrored Redis image tag used by the live install.
+Confirm the Redis image tag in `values.yaml` matches the live Argo CD Redis deployment before sync.
 
 ## Render And Diff
 
@@ -40,4 +40,3 @@ kubectl -n argocd diff -f /tmp/argocd-rendered.yaml
 - Argo CD self-management should start with manual sync.
 - Be careful with prune/self-heal on Argo CD itself.
 - Do not store repo credentials or admin passwords in Git.
-
